@@ -607,12 +607,10 @@ class PollIOLoop(IOLoop):
             with self._callback_lock:
                 callbacks = self._callbacks
                 self._callbacks = []
-            n_callbacks = 0
             for callback in callbacks:
-                n_callbacks += 1
                 transaction.add(self._run_callback, callback)
             transaction.run()
-            logging.warn('run %d callbacks in parallel', n_callbacks)
+            logging.warn('run %d callbacks in parallel', len(callbacks))
             # Closures may be holding on to a lot of memory, so allow
             # them to be freed before we go into our poll wait.
             callbacks = callback = None
