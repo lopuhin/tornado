@@ -612,7 +612,7 @@ class PollIOLoop(IOLoop):
                 n_callbacks += 1
                 transaction.add(self._run_callback, callback)
             transaction.run()
-            logging.info('run %d callbacks in parallel', n_callbacks)
+            logging.warn('run %d callbacks in parallel', n_callbacks)
             # Closures may be holding on to a lot of memory, so allow
             # them to be freed before we go into our poll wait.
             callbacks = callback = None
@@ -685,7 +685,7 @@ class PollIOLoop(IOLoop):
                 handler = self._handlers[fd]
                 transaction.add(self._handle_event, fd, handler, events)
             transaction.run()
-            logging.info('run %d handlers in parallel', n_handlers)
+            logging.warn('run %d handlers in parallel', n_handlers)
 
         # reset the stopped flag so another start/stop pair can be issued
         self._stopped = False
