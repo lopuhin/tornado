@@ -452,7 +452,7 @@ class HTTPRequest(object):
         self.host = host or self.headers.get("Host") or "127.0.0.1"
         self.files = files or {}
         self.connection = connection
-        self._start_time = time.time()
+        self._start_time = None #time.time()
         self._finish_time = None
 
         self.path, sep, self.query = uri.partition('?')
@@ -491,6 +491,7 @@ class HTTPRequest(object):
 
     def request_time(self):
         """Returns the amount of time it took for this request to execute."""
+        return 0.0
         if self._finish_time is None:
             return time.time() - self._start_time
         else:
