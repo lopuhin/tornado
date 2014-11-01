@@ -57,6 +57,21 @@ try:
 except ImportError:
     import _thread as thread  # py3
 
+try:
+    import transaction as stm_transaction
+except ImportError:
+    class FakeSTMTransaction(object):
+        def __init__(self):
+            self._callbacks = []
+        def add(self, fn, *args, **kwargs):
+            self._callbacks.append((fn, args, kwargs))
+        def run(self):
+            for fn, args, kwargs in self._callbacks:
+                fn(*args, **kwargs)
+            self._callbacks = []
+    stm_transaction = FakeSTMTransaction()
+
+
 from tornado.platform.auto import set_close_exec, Waker
 
 
@@ -608,9 +623,8 @@ class PollIOLoop(IOLoop):
                 callbacks = self._callbacks
                 self._callbacks = []
             for callback in callbacks:
-                transaction.add(self._run_callback, callback)
-            transaction.run()
-            logging.warn('loop start: run %d callbacks in parallel', len(callbacks))
+                stm_transaction.add(self._run_callback, callback)
+            stm_transaction.run()
             # Closures may be holding on to a lot of memory, so allow
             # them to be freed before we go into our poll wait.
             callbacks = callback = None
@@ -681,9 +695,8 @@ class PollIOLoop(IOLoop):
                 n_handlers += 1
                 fd, events = self._events.popitem()
                 handler = self._handlers[fd]
-                transaction.add(self._handle_event, fd, handler, events)
-            transaction.run()
-            logging.warn('loop end: run %d handlers in parallel', n_handlers)
+                stm_transaction.add(self._handle_event, fd, handler, events)
+            stm_transaction.run()
 
         # reset the stopped flag so another start/stop pair can be issued
         self._stopped = False
