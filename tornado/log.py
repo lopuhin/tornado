@@ -40,7 +40,7 @@ from tornado.util import unicode_type, basestring_type
 
 try:
     import curses
-except:
+except ImportError:
     curses = None
 
 # Logger objects for internal tornado use
