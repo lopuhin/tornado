@@ -40,7 +40,6 @@ import sys
 import threading
 import time
 import traceback
-import transaction
 
 from tornado.concurrent import Future, TracebackFuture
 from tornado.log import app_log, gen_log
