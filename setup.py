@@ -15,7 +15,6 @@
 # under the License.
 
 import os
-import platform
 import sys
 import warnings
 
@@ -103,19 +102,21 @@ version = "4.1.dev1"
 with open('README.rst') as f:
     kwargs['long_description'] = f.read()
 
-if (platform.python_implementation() == 'CPython' and
-    os.environ.get('TORNADO_EXTENSION') != '0'):
-    # This extension builds and works on pypy as well, although pypy's jit
-    # produces equivalent performance.
-    kwargs['ext_modules'] = [
-        Extension('tornado.speedups',
-                  sources=['tornado/speedups.c']),
-    ]
+try:
+    import __pypy__
+except ImportError:
+    if os.environ.get('TORNADO_EXTENSION') != '0':
+        # This extension builds and works on pypy as well, although pypy's jit
+        # produces equivalent performance.
+        kwargs['ext_modules'] = [
+            Extension('tornado.speedups',
+                    sources=['tornado/speedups.c']),
+        ]
 
-    if os.environ.get('TORNADO_EXTENSION') != '1':
-        # Unless the user has specified that the extension is mandatory,
-        # fall back to the pure-python implementation on any build failure.
-        kwargs['cmdclass'] = {'build_ext': custom_build_ext}
+        if os.environ.get('TORNADO_EXTENSION') != '1':
+            # Unless the user has specified that the extension is mandatory,
+            # fall back to the pure-python implementation on any build failure.
+            kwargs['cmdclass'] = {'build_ext': custom_build_ext}
 
 
 if setuptools is not None:
